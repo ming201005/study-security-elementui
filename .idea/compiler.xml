@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="02-app-b2c" />
+        <module name="sesurity-jwt-b2c" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="02-app-b2c" target="1.8" />
+      <module name="b2c" target="1.8" />
+      <module name="sesurity-jwt-b2c" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="02-app-b2c" options="-parameters" />
+      <module name="b2c" options="-parameters" />
+      <module name="sesurity-jwt-b2c" options="-parameters" />
+    </option>
+  </component>
+</project>

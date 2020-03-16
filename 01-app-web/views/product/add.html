@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>添加商品</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../static/css/index.css">
+    <link rel="stylesheet" href="../../static/eui/element-ui.css">
+    <script src="../../static/vue/vue.min.js"></script>
+    <script src="../../static/vue/vue-resource.js"></script>
+    <script src="../../static/eui/index.js"></script>
+    <script src="../../static/comm/pageReload.js"></script>
+    <script src="../../static/comm/shopComm.js"></script>
+
+    <script src="../../static/js/axios.min.js"></script>
+    <script src="../../static/js/auth.js"></script>
+    <script src="../../static/js/checkIsLogin.js"></script>
+
+    <style>
+        body {
+            font-size: 14px;
+            padding: 10px;
+        }
+        .el-dialog__header {
+            padding: 5px 20px 5px 20px;
+        }
+        .el-dialog__headerbtn {
+            position: absolute;
+            top: 5px;
+            right: 20px;
+            padding: 0;
+            background: 0 0;
+            border: none;
+            outline: 0;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .el-dialog--center .el-dialog__body {
+            text-align: initial;
+            padding: 0px;
+        }
+        .el-dialog__footer {
+            padding: 5px;
+            text-align: right;
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+        .newFile{
+            display: inline-block;
+            background: #FFFFFF;
+            border: 1px dashed #E3E2E5;
+            border-radius: 4px;
+            width: 145px;
+            height: 145px;
+            text-align: center;
+            cursor: pointer;
+            margin: 15px 15px 0px 15px;
+            padding: 2px;
+        }
+        .addNewFile{
+            height: 145px;
+            width: 145px;
+            font-size: 35px;
+            text-align:center;
+            display: table-cell;
+            vertical-align:middle;
+            color: #e4e4e4;
+            font-weight:bold;
+        }
+    </style>
+</head>
+<body>
+<div id="app" v-loading="loading">
+
+    <span class="el-refresh"  onclick='pageReload()'>
+        <el-tooltip content="刷新" placement="bottom" effect="light">
+            <i class="el-icon-refresh"></i>
+        </el-tooltip>
+    </span>
+
+    <!--返回页面-->
+    <!--<el-page-header @back="goBack" content="添加商品"></el-page-header>-->
+
+    <!--保存按钮-->
+    <div class="buttonSpan">
+        <el-button :disabled="stepNum<2?true:false" type="primary" @click="next(-1)">上一步</el-button>
+        <el-button :disabled="stepNum>2?true:false" type="primary" @click="next(1)">下一步</el-button>
+        <el-button type="primary" @click="submitForm('ruleForm')">保存</el-button>
+        <el-button @click="resetForm('ruleForm')">重置</el-button>
+    </div>
+
+    <!--触低返回-->
+
+    <!--<template>-->
+    <!--<el-backtop target=".page-component__scroll .el-scrollbar__wrap" visibility-height="50">-->
+    <!--<li class="el-icon-caret-top"></li>-->
+    <!--</el-backtop>-->
+    <!--</template>-->
+
+    <!--操作步骤-->
+    <el-steps :active="stepNum" align-center>
+        <el-step title="基本信息"></el-step>
+        <el-step title="商品照片"></el-step>
+        <el-step title="详细描述"></el-step>
+    </el-steps>
+
+    <!--表单-->
+    <el-form v-if="loading==false" :model="ruleForm" :rules="rules" ref="ruleForm" label-width="150px">
+
+        <!--第一步骤内容-->
+        <div v-show="stepNum==1">
+            <el-form-item label="销售模式" prop="productSaleModel">
+                <el-col :span="11">
+                    <el-radio-group clearable v-model="ruleForm.productSaleModel">
+                        <el-radio v-for="item in productSaleModelData" :label="item.value">{{item.name}}</el-radio>
+                    </el-radio-group>
+                </el-col>
+            </el-form-item>
+
+            <el-form-item label="登记日期" prop="productCreateTime">
+                <el-col :span="8">
+                    <el-date-picker
+                            v-model="ruleForm.productCreateTime"
+                            type="date"
+                            placeholder="登记日期" style="width: 100%;">
+                    </el-date-picker>
+                </el-col>
+            </el-form-item>
+
+            <el-form-item label="商品分类" prop="productTypeId">
+                <el-col :span="8">
+                    <el-select clearable v-model="ruleForm.productTypeId" placeholder="--请选择--" style="width: 100%;">
+                        <el-option v-for="item in productTypeData"
+                                   :key="item.id"
+                                   :label="item.productTypeName"
+                                   :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-col>
+            </el-form-item>
+
+
+            <el-form-item label="商品标签" prop="productTagId">
+                <el-col :span="8">
+                    <el-select clearable v-model="ruleForm.productTagId" placeholder="--请选择--" style="width: 100%;">
+
+                        <el-option v-for="item in productTagData"
+                                   :key="item.id"
+                                   :label="item.productTagName"
+                                   :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-col>
+            </el-form-item>
+
+            <el-form-item label="商品名称" prop="productName">
+                <el-col :span="24">
+                    <el-input clearable v-model="ruleForm.productName" style="width: 323px;"></el-input>
+                    <el-switch style="width: 110px;"
+                               v-model="ruleForm.productPnValue"
+                               active-color="#13ce66"
+                               inactive-color="#ff4949"
+                               active-text="智能标题"
+                               inactive-text="">
+                    </el-switch>
+                    <span>(购买页显示：{{pnGenerater()}})</span>
+                </el-col>
+            </el-form-item>
+
+            <el-row>
+                <el-col :span="24">
+                    <el-form-item label="规格"  prop="productStandards——productSaleUnitData">
+                        <!--规则-->
+                        <el-input  style="width: 120px;" clearable type="number"  min="0"  v-model="ruleForm.productStandards"></el-input>
+                        <!--单位-->
+                        <el-select style="width: 100px;"  clearable v-model="ruleForm.productSaleUnitId" placeholder="--单位--">
+                            <el-option v-for="item in productSaleUnitData"
+                                       :key="item.id"
+                                       :label="item.unitNameZh"
+                                       :value="item.id">
+                            </el-option>
+                        </el-select>
+                        <!--份数-->
+                        <el-input style="width: 92px;" clearable type="number" v-model="ruleForm.productCopies"  min="0"></el-input>
+                        <!--精确/大约数目-->
+                        <el-switch style="width: 110px;"
+                                   v-model="ruleForm.productGgValue"
+                                   active-color="#13ce66"
+                                   inactive-color="#ff4949"
+                                   active-text="大约数据"
+                                   inactive-text="">
+                        </el-switch>
+                        <span>(购买页显示：{{saleShow()}})</span>
+                    </el-form-item>
+
+                    <!--<el-form-item label="产地" prop="productSaleUnitId">-->
+                    <!--<el-select v-model="ruleForm.productSaleUnitId" placeholder="&#45;&#45;请选择&#45;&#45;">-->
+                    <!--<el-option v-for="item in productSaleUnitData"-->
+                    <!--:key="item.id"-->
+                    <!--:label="item.unitNameZh"-->
+                    <!--:value="item.id">-->
+                    <!--</el-option>-->
+                    <!--</el-select>-->
+                    <!--</el-form-item>-->
+                </el-col>
+
+                <!--<el-col :span="6">-->
+                    <!--<el-form-item label="库存"  prop="productAmount">-->
+                        <!--<el-input clearable type="number"  min="0"  v-model="ruleForm.productAmount"></el-input>-->
+                    <!--</el-form-item>-->
+                <!--</el-col>-->
+
+                <!--<el-col :span="6">-->
+                <!--<el-form-item label="规格"  prop="productWeight">-->
+                <!--<el-input clearable type="number"  min="0"  v-model="ruleForm.productWeight"></el-input>-->
+                <!--</el-form-item>-->
+                <!--</el-col>-->
+
+            </el-row>
+
+            <el-row>
+                <el-col :span="6">
+                    <el-form-item label="销售价(元)"    prop="productSalePrice">
+                        <el-input clearable type="number"  min="0" v-model="ruleForm.productSalePrice" ></el-input>
+                    </el-form-item>
+                </el-col>
+
+                <el-col :span="6">
+                    <el-form-item label="划线价(元)"  prop="productMarketPrice">
+                        <el-input clearable type="number"  min="0"  v-model="ruleForm.productMarketPrice"></el-input>
+                    </el-form-item>
+                </el-col>
+
+                <el-col :span="6">
+                    <el-form-item label="成本价(元)"  prop="productCostPrice">
+                        <el-input clearable type="number"  min="0"  v-model="ruleForm.productCostPrice"></el-input>
+                    </el-form-item>
+                </el-col>
+
+            </el-row>
+
+        </div>
+
+        <!--第二步骤内容-->
+        <div v-show="stepNum==2">
+
+            <el-form-item label="添加图片"  prop="productWeight">
+                <div class="imgBox">
+                    <!--循环显示图片-->
+                    <div class="imgItem" v-for="(item,index) in isCheckImgList">
+                        <!--图片显示，用背景图的方式显示-->
+                        <div class="imageShow"
+                             :style="{'backgroundImage': 'url(' + Shop.BASE_IMG_URL+item.resourceName + ')'}">
+                            <!--当被选中时，上边出现阴影遮住效果-->
+                            <div>
+                                <div style="height: 20px;">
+                                    <span   size="mini" @click="Shop.delFielByIndex(index,isCheckImgList)" class="el-icon-delete showHide"></span>
+                                    <!--<span   size="mini" @click="viewImg(Shop.BASE_IMG_URL+item.resourceName)" class="el-icon-view showHide"></span>-->
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!--添加图片的按钮-->
+                    <div class="newFile" v-if="checkNumberMax>isCheckImgList.length" @click="openWin()">
+                        <span class="addNewFile el-icon-plus">
+                            <p style="font-size: 12px;">添加图片</p>
+                        </span>
+                    </div>
+
+                </div>
+                <!--弹窗选择图片-->
+                <el-dialog title="选择图片"
+                           width="80%"
+                           top="25px"
+                           center
+                           :visible.sync="dialogFormVisible">
+                    <iframe  id="imgIframe"
+                             :src="imgUrl"
+                             height="430px"
+                             width="100%"
+                             frameborder="0"
+                             scrolling="false"></iframe>
+                </el-dialog>
+            </el-form-item>
+
+        </div>
+
+        <!--第三步骤内容-->
+        <div v-show="stepNum==3">
+
+            <el-form-item label="活动形式" prop="productInformation">
+                <el-input type="textarea" v-model="ruleForm.productInformation"
+                          style="height: 200px; line-height: 200px;"></el-input>
+            </el-form-item>
+        </div>
+
+    </el-form>
+
+</div>
+
+</body>
+
+<script>
+    var Main = {
+        data() {
+            /**
+             * 检查双精度的数字类型（如：销售价）
+             */
+            var isDouble = (rule, value, callback) => {
+                var expStr = /^\d+$|^\d+[.]?\d+$/
+                if (!expStr.test(value)) {
+                    callback(new Error('销售价是数字类型。'))
+                }else{
+                    callback()
+                }
+            };
+
+            return {
+                baseApi:'',
+                //页面加载状态控制
+                loading:true,
+                //唯一id
+                productId:0,
+
+                //操作步骤，默认是第一步
+                stepNum: 1,
+
+                //表单数据对象
+                ruleForm: {
+                    //
+                    productPnValue : true,
+                    productGgValue :false
+
+                },
+
+                //销售模式下拉数据源
+                productSaleModelData: [],
+                //商品分类下拉数据源定义
+                productTypeData: [],
+                //标签
+                productTagData:[],
+                //单位
+                productSaleUnitData:[],
+
+                //表单验证配置
+                rules: {
+                    productSaleModel: [
+                        {required: true, message: '请选择销售模式'}
+                    ],
+                    productName: [
+                        {required: true, message: '请输入商品名称', trigger: 'blur'}
+                    ],
+                    productTypeId: [
+                        {required: true, message: '请选择商品分类', trigger: 'change'}
+                    ],
+                    productSalePrice: [
+                        {required: true,  message: '销售价不能为空', trigger: 'blur'},
+                        { validator: isDouble, trigger: 'blur' }
+                    ],
+                    productSaleUnitId:[
+                        {required: true, message: '请选择单位', trigger: 'change'}
+                    ]
+                },
+
+                //商品图片窗口是否被打开、关闭
+                dialogFormVisible: false,
+
+                //最多允许选中图片张数
+                checkNumberMax:6,
+                //
+                //已经选中的图片列表
+                isCheckImgList:[],
+
+                //打开选择商品图片的窗口地址
+                imgUrl : "../resource/index.html?fromPage=product",
+
+                //商品智能显示名称(前端显示）
+                productNameValue:"",
+
+                //商品规格(前端显示）
+                productStandardsValue:""
+
+            };
+        },
+
+        created: function () {
+
+            //取商品id
+            this.productId = Shop.getParameter("id");
+
+            //加载商品分类
+            Shop.getBaseListApi(global_api_url + "productType", data => {
+                this.productTypeData = data;
+            });
+
+            //加载枚举销售模式
+            Shop.getEnumListApi(global_api_url + "productSaleModelEnum", data => {
+                this.productSaleModelData = data;
+            });
+
+            //加载标签
+            Shop.getBaseListApi(global_api_url + "productTag", data => {
+                this.productTagData = data;
+            });
+
+            //加载单位
+            Shop.getBaseListApi(global_api_url + "productUnit", data => {
+                this.productSaleUnitData = data;
+            });
+
+            //判断商品id是不是有值
+            if (this.productId != null && this.productId>0) {
+                this.getProductById();
+            }else{
+                //设置0
+                this.productId = 0;
+                //取消加载
+                this.loading = false;
+            }
+
+
+        },
+        methods: {
+
+            /**
+             * 通过id获取产品信息
+             */
+            getProductById: function () {
+                //编辑时，进入页面取数据
+                if (this.productId>0) {
+                    let apiURL = global_api_url +"product/" + this.productId;
+                    //调用ajax取数据
+                    axios.get(apiURL).then(rs => {
+
+                        console.log("getProductById==>",rs);
+
+                        if (rs.data.code == 0) {
+                            this.ruleForm = rs.data.data;
+
+                            //加载图片
+                            this.getPicListById(this.ruleForm.productImgId);
+
+                            this.loading = false;
+                        } else {
+                            this.$message.error("错误消息：" + rs.data.msg);
+                        }
+                    }).catch(e => {
+                        alert(e);
+                    });
+                }
+            },
+
+            /**
+             * 查询图片
+             */
+            getPicListById(ids) {
+
+                let apiURL = global_api_url+"resource/isCheck?ids="+ids;
+                axios.get(apiURL).then(rs => {
+
+                    console.log("getProductById==>",rs);
+
+                    if (rs.data.code == 0) {
+
+                        let rsImgList = rs.data.data;
+                        //console.log("排序前==》",rsImgList)
+                        //由于查询结果没有按照id先后顺序排序，这里需要处理
+                        let idsArr = ids.split(",");
+                        //简单查找法
+                        for (let index in idsArr) {
+                            for (let row in rsImgList){
+                                if (idsArr[index] == rsImgList[row].id) {
+                                    //console.log("找到！！",rsImgList[row].id);
+                                    this.isCheckImgList.push(rsImgList[row]);
+                                    break;
+                                }
+                            }
+                        }
+                    } else {
+                        this.$message.error("错误消息：" + rs.data.msg);
+                    }
+                }).catch(e => {
+                    alert(e);
+                });
+            },
+
+
+            /**
+             * 步骤上下操作
+             * @param n
+             */
+            next: function (n) {
+                //上移
+                if (n == -1 && this.stepNum > 1) {
+                    this.stepNum--;
+                }
+                //下移
+                if (n == 1 && this.stepNum < 3) {
+                    this.stepNum++;
+                }
+            },
+
+
+            /**
+             * 取得图片id（多个id）
+             */
+            getImgIds:function(){
+                let ids = [];
+                if (this.isCheckImgList &&this.isCheckImgList.length>0) {
+                    for (let index in this.isCheckImgList){
+                        ids.push(this.isCheckImgList[index].id);
+                    }
+                }
+                return ids.join(",");
+            },
+
+
+
+            /**
+             * 保存提交
+             * @param formName
+             */
+            submitForm:function(formName) {
+                let apiURL = global_api_url + "product";
+                //调用验证方法
+                let result =  this.validate(formName);
+                console.log("validate result==>",result);
+                if(result.rs) {
+                    //提交
+                    if(result.type === Shop.TYPE_POST )
+                        this.add(apiURL,result.data,result.msg);
+                    else if(result.type === Shop.TYPE_PUT)
+                        this.edit(apiURL,result.data,result.msg);
+                }else{
+                    this.$message.error(result.msg);
+                }
+            },
+
+            /**
+             * 新增
+             */
+            add(url,data,message) {
+                axios.post(url, data).then( rs => {
+                    if(rs.data.code == 0) {
+                        rs = rs.data ;
+                        //更新
+                        this.ruleForm = rs.data;
+                        this.productId = this.ruleForm.id;
+                        //让加载消失
+                        this.loading = false;
+                        console.log("add   this.ruleForm===>", this.ruleForm);
+                        this.$message.success(message);
+                    }else{
+                        alert(rs.data.msg);
+                    }
+                }).catch(err => {
+                    console.log(err);
+                });
+            },
+
+
+            /**
+             * 修改
+             */
+            edit(url,data,message) {
+                axios.put(url, data).then( rs => {
+                    if(rs.data.code == 0) {
+                        rs = rs.data ;
+                        this.loading = false;
+                        console.log("edit   this.ruleForm===>", this.ruleForm);
+                        this.$message.success(message);
+                    }else{
+                        alert(rs.data.msg);
+                    }
+                }).catch(err => {
+                    console.log(err);
+                });
+            },
+
+            /**
+             * 检测数据和预处理
+             * 返回检测结果：
+             * 检测通过与否：true/false
+             * 检测提示信息：msg
+             * 检测通过，返回data数据
+             */
+            validate(formName) {
+                let _this = this;
+                let result = null;
+                //验证TODO
+                _this.$refs[formName].validate( valid => {
+                    if(valid) {
+
+                        //默认是新增
+                        let callType = Shop.TYPE_POST;
+                        let message  = "新增成功！";
+
+                        //---------------------------------------------------------------------------
+                        //图片处理
+                        if (_this.isCheckImgList &&_this.isCheckImgList.length>0) {
+                            //图片信息
+                            _this.ruleForm.productImgId = _this.getImgIds();
+                            //主图
+                            _this.ruleForm.productImgIndexUrl = _this.isCheckImgList[0].resourceName;
+                        }
+
+                        //商品智能显示名称(前端显示）
+                        _this.ruleForm.productNameValue = _this.productNameValue;
+
+                        //商品规格(前端显示）
+                        _this.ruleForm.productStandardsValue = _this.productStandardsValue;
+
+                        //以上也可以用放在vue计算属性做处理
+                        //---------------------------------------------------------------------------
+                        //return;
+                        if (_this.productId>0){
+                            //当id大于0，说明是修改
+                            callType = Shop.TYPE_PUT;
+                            message  = "修改成功！";
+                        }
+                        result = {
+                            rs : true,
+                            data:_this.ruleForm,
+                            type:callType,
+                            msg : message
+                        };
+                    } else {
+                        result = {
+                            rs : false,
+                            msg : "表单填写不正确，请仔细检查！"
+                        };
+                    }
+                });
+
+                return result;
+            },
+
+
+            //打开选中图片窗口
+            openWin(){
+
+                this.dialogFormVisible = true;
+
+                let frame = document.getElementById('imgIframe');
+
+                //每次都重新加载
+                if (frame) {
+                    frame.contentWindow.location.reload(true);
+                }
+            },
+
+            /**
+             * 选择图片
+             */
+            toChonseImg(imgData){
+
+                this.dialogFormVisible = false;
+
+                if (imgData && imgData.length>0) {
+                    //合并选择
+                    this.isCheckImgList = this.isCheckImgList.concat(imgData);
+                }
+
+                console.log("合并后===》》",this.isCheckImgList);
+
+            },
+
+            /**
+             * 前端显示商品规格
+             */
+            saleShow:function() {
+
+                let g   = this.ruleForm.productStandards;
+                let uid = this.ruleForm.productSaleUnitId;
+                let num = this.ruleForm.productCopies;
+
+                let str = this.ruleForm.productGgValue? "约":"";
+
+                str += g||"";
+
+                if (uid){
+                   for (let index in this.productSaleUnitData){
+                       if (uid == this.productSaleUnitData[index].id){
+                           str+= this.productSaleUnitData[index].unitNameZh;
+                           break;
+                       }
+                   }
+                }
+
+                if (num && num>0){
+                    str += "*"+num;
+                }
+
+                this.productStandardsValue = str;
+
+                return str;
+            },
+
+            /**
+             * 商品名称自动生成规则
+             */
+            pnGenerater:function(){
+
+                let productNameText = "";
+                if (this.ruleForm.productPnValue) {
+                    // 生成规则：产地+品牌名称+输入部分+商品规格
+                    productNameText =  (this.ruleForm.productName||"") +" "+ this.saleShow();
+                }else{
+                    productNameText =  this.ruleForm.productName;
+                }
+
+                this.productNameValue = productNameText;
+
+                return productNameText;
+            },
+
+
+            /**
+             * 表单重置
+             * @param formName
+             */
+            resetForm :function(formName) {
+                this.$refs[formName].resetFields();
+            }
+        }
+    }
+    var Ctor = Vue.extend(Main)
+    var app = new Ctor().$mount('#app');
+
+</script>
+</html>

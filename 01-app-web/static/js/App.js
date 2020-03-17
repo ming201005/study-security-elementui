@@ -1,28 +1,28 @@
+//api访问地址，可修改
+const global_api_url = "http://localhost:8088/";
+//图片所在地址,用nginx配置一个资源服务器，指向资源路径
+const BASE_IMG_URL   = "http://localhost:81/images/";
+//html所在路径
+const htmlPath = "views";
 
 /**
- * moxiaoming
- * Shop
+ * mo xiao ming
+ * App
  * 封装一些常用的方法，和业务无关，其他项目也可以使用
  * 含private_的方法是提供本类内部调用
  * 其他可通用调用
  */
-var Shop =
+let App =
 {
     TYPE_GET    : 'get',
     TYPE_POST   : 'post',
     TYPE_PUT    : 'put',
     TYPE_DELETE : 'delete',
 
-    //api基础访问地址
-    BASE_URL    : 'http://localhost:8086/',
-
-    //图片所在地址
-    BASE_IMG_URL: "http://localhost:81/images/",
-
     /**
      * 基础列表形式，无分页 api
      */
-    getBaseListApi:function (apiName,returnData) {
+    getBaseListApi (apiName,returnData) {
 
         let apiUrl = apiName + "?size=1000";
 
@@ -42,7 +42,7 @@ var Shop =
     /**
      * 枚举列表形式 api
      */
-    getEnumListApi:function (enumName,returnData) {
+    getEnumListApi (enumName,returnData) {
 
         let apiUrl = enumName ;
         axios.get(apiUrl).then(rs=>{
@@ -58,64 +58,13 @@ var Shop =
         });
     },
 
-    /**
-     * 通用数据请求方法
-     * @param vueObj  
-     * @param apiURL
-     * @param callback
-     * @param params
-     * @param calltype
-     */
-    ajax : function(vueObj,apiURL,callback,params,calltype)
-    {
-        apiURL = this.BASE_URL+apiURL;
-        //根据不同的调用方式
-        switch (calltype || this.TYPE_GET)
-        {
-            //get 方式
-            case this.TYPE_GET :
-                vueObj.$http.get(apiURL, params,{emulateJSON:true}).then( res => {this.private_docallback(res,callback,this.TYPE_GET)});
-                break ;
-            //post 方式 ,{emulateJSON:true}解决跨域
-            case this.TYPE_POST :
-                vueObj.$http.post(apiURL, params,{emulateJSON:true}).then( res => {this.private_docallback(res,callback,this.TYPE_POST)});
-                break ;
-            //put 方式,{emulateJSON:true}解决跨域
-            case this.TYPE_PUT :
-                vueObj.$http.put(apiURL, params,{emulateJSON:true}).then( res => {this.private_docallback(res,callback,this.TYPE_PUT)});
-                break ;
-            //delete方式,{emulateJSON:true}解决跨域
-            case this.TYPE_DELETE :
-                vueObj.$http.delete(apiURL, params,{emulateJSON:true}).then( res => {this.private_docallback(res,callback,this.TYPE_DELETE)});
-                break ;
-        };
-    },
-
-    /**
-     * 通用回调方法
-     * @param res
-     * @param callback
-     * @param calltype
-     */
-    private_docallback : function(res,callback,calltype) {
-
-        var result = JSON.parse(res.body);
-
-        if(calltype==this.TYPE_GET) {
-            //查询返回data，其他的不要
-            callback(result);
-        }else if( res && (calltype==this.TYPE_POST || calltype==this.TYPE_PUT || calltype==this.TYPE_DELETE)){
-            ////增删改，返回整个rs对象
-            callback(result);
-        }
-    },
 
     /**
      * 取参数
      * @param name
      * @returns {string}
      */
-    getParameter:function(name) {
+    getParameter(name) {
         var query = window.location.search;
         var iLen = name.length;
         var iStart = query.indexOf(name);
@@ -133,7 +82,7 @@ var Shop =
      * arg_val 替换后的参数的值
      * return url 参数替换后的url
      */
-    changeURLArg:function(url,arg,arg_val) {
+    changeURLArg(url,arg,arg_val) {
         var pattern=arg+'=([^&]*)';
         var replaceText=arg+'='+arg_val;
         if(url.match(pattern)){
@@ -155,7 +104,7 @@ var Shop =
      * @param json
      * @returns {string}
      */
-    jsonToParams:function (json) {
+    jsonToParams (json) {
         var str = "";
         var value = "";
         for (var key in json) {
@@ -177,7 +126,7 @@ var Shop =
      * @param fmt
      * @returns {*}
      */
-    formatDate:function (date, fmt) {
+    formatDate (date, fmt) {
         if (/(y+)/.test(fmt)) {
             fmt = fmt.replace(RegExp.$1, (date.getFullYear() + '').substr(4 - RegExp.$1.length));
         }
@@ -202,7 +151,7 @@ var Shop =
     },
 
     //删除选中的图片(唯一id删除)
-    delFielById:function(row,list) {
+    delFileById(row, list) {
         //从到选中的图片中删除
         for (let itemIndex in list) {
             //通过id查找，找到后删除立马跳出循环
@@ -215,7 +164,7 @@ var Shop =
     },
 
     //删除选中的图片（下标删除）
-    delFielByIndex:function(index,list) {
+    delFileByIndex(index, list) {
         //从到选中的图片中删除
         for (let itemIndex in list) {
             //通过id查找，找到后删除立马跳出循环
@@ -225,5 +174,39 @@ var Shop =
                 break;
             }
         }
+    },
+
+    /**
+     * 检查双精度的数字类型（如：销售价）
+     */
+     isDouble : (rule, value, callback) => {
+        let expStr = /^\d+$|^\d+[.]?\d+$/
+        if (!expStr.test(value)) {
+            callback(new Error('销售价是数字类型。'))
+        }else{
+            callback()
+        }
+    },
+
+    /**
+     * 左侧高度
+     * @returns {number}
+     */
+    getLeftMenuHeight() {
+        //浏览器打开高度
+        let clientHeight = document.documentElement.clientHeight;
+        //左侧高度
+        return clientHeight-60;
+    },
+
+    /**
+     * 左侧高度
+     * @returns {number}
+     */
+    getIfmAutoHeight() {
+        //设置iframe自适高度
+        return this.getLeftMenuHeight() - 65;
     }
+
+
 };

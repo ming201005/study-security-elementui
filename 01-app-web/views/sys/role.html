@@ -2,13 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>用户管理</title>
-    <script src="../static/js/vue.js"></script>
-    <script src="../static/js/axios.min.js"></script>
-    <script src="../static/js/auth.js"></script>
-    <script src="../static/js/checkIsLogin.js"></script>
+    <title>角色</title>
 
-    <link rel="stylesheet" href="../static/css/template.css">
+    <script src="../../static/js/vue.min.js"></script>
+    <script src="../../static/js/axios.min.js"></script>
+    <script src="../../static/eui/index.js"></script>
+
+    <script src="../../static/js/App.js"></script>
+    <script src="../../static/js/auth.js"></script>
+    <script src="../../static/js/checkIsLogin.js"></script>
+
+    <link rel="stylesheet" href="../../static/css/template.css">
 </head>
 <body>
 <div id="app">
@@ -16,19 +20,15 @@
     <div class="model_box">
 
         <div class="item">
-            <label for="name">用户名称：</label>
-            <input id="name" v-model="model.name">
+            <label for="roleName">角色名称：</label>
+            <input id="roleName" v-model="model.roleName">
+            <span>新建时，自动加前缀“ROLE_” 。 </span>
+            <span>不能删除ROLE_ADMIN，角色，如果删除，请到数据库手动添加。</span>
         </div>
 
         <div class="item">
-            <label for="passw">用户密码：</label>
-            <input type="password" id="passw" v-model="model.passw">
-            <span>初始密码：000000</span>
-        </div>
-
-        <div class="item">
-            <label for="des">说明：</label>
-            <input id="des" v-model="model.des">
+            <label for="description">说明：</label>
+            <input id="description" v-model="model.description">
         </div>
         <div class="button_group">
             <button @click="save" >保存</button>
@@ -37,26 +37,25 @@
     </div>
 
     <div class="model_list">
-        <div class="button_group"
-             style="justify-content:left;border: 1px solid #A8A8A8; border-bottom: 0px; width: 99.8%;">
+        <div class="button_group line">
             <button @click="addNew" >新建</button>
             <button >删除</button>
         </div>
         <table width="100%" border="0" cellspacing="1" cellpadding="0">
             <tr class="h">
                 <td>编码</td>
-                <td>用户名称</td>
+                <td>角色名称</td>
                 <td>描述</td>
                 <td>操作</td>
             </tr>
 
             <tr v-for="item in modelList">
-                <td>{{item.userId}}</td>
-                <td>{{item.userName}}</td>
+                <td>{{item.roleId}}</td>
+                <td>{{item.roleName}}</td>
                 <td>{{item.description}}</td>
                 <td>
                     <button @click="editModel(item)" >编辑</button>
-                    <button @click="del(item.userId)" >删除</button>
+                    <button @click="del(item.roleId)" >删除</button>
                 </td>
             </tr>
         </table>
@@ -68,13 +67,12 @@
     let vue = new Vue({
         el: "#app",
         data: {
-            url : global_api_url+"user",
+            url : global_api_url+"sysRoleTable",
             //对象
             model:{
-                id:null,
-                name:null,
-                passw:'000000',
-                des:null
+                roleId:null,
+                roleName:null,
+                description:null
             },
             //列表
             modelList:[]
@@ -85,10 +83,11 @@
         methods: {
             //查询列表
             getModelList() {
-                axios.get(this.url+"/search").then(rs => {
+                axios.get(this.url+"?size=100").then(rs => {
                     if(rs.data.code == 0) {
-                        this.modelList = rs.data.data;
-                        console.log(this.modelList);
+                        console.log(rs.data.data);
+                        //注意后台调用的是分页的API
+                        this.modelList = rs.data.data.records;
                     }else{
                         alert(rs.data.msg);
                     }
@@ -108,10 +107,7 @@
              * 准备编辑的数据
              */
             editModel(item){
-                this.model.id = item.userId;
-                this.model.name = item.userName;
-                this.model.passw = "000000";
-                this.model.des = item.description;
+                this.model = item;
             },
 
 
@@ -119,19 +115,22 @@
              * 保存数据，包括新增、和编辑
              */
             save(){
-                if(this.model.id == null){
-                    this.register();
+                if(this.model.roleId ==null){
+                    this._add();
                 }else{
                     this._edit();
                 }
             },
 
-            //新增用户---注册用户
-            register() {
+            /**
+             * 新增
+             */
+            _add() {
                 console.log("here  add...............")
 
-                axios.post(this.url+"/register", this.model).then( rs => {
+                axios.post(this.url, this.model).then( rs => {
                     if(rs.data.code == 0) {
+                        this.model = rs.data.data;
                         this.getModelList();
                     }else{
                         alert(rs.data.msg);
@@ -149,6 +148,7 @@
                 console.log("here  edit...............")
                 axios.put(this.url, this.model).then( rs => {
                     if(rs.data.code == 0) {
+
                         this.getModelList();
                     }else{
                         alert(rs.data.msg);
@@ -177,7 +177,6 @@
                     });
                 }
             }
-
         }
     });
 

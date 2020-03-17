@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="../../static/css/index.css">
     <link rel="stylesheet" href="../../static/eui/element-ui.css">
-    <script src="../../static/vue/vue.min.js"></script>
-    <script src="../../static/vue/vue-resource.js"></script>
-    <script src="../../static/eui/index.js"></script>
-    <script src="../../static/comm/pageReload.js"></script>
-    <script src="../../static/comm/shopComm.js"></script>
 
+    <script src="../../static/js/vue.min.js"></script>
     <script src="../../static/js/axios.min.js"></script>
+    <script src="../../static/eui/index.js"></script>
+
+    <script src="../../static/js/App.js"></script>
     <script src="../../static/js/auth.js"></script>
     <script src="../../static/js/checkIsLogin.js"></script>
+    <script src="../../static/js/RefreshComponent.js"></script>
 
     <style>
         body {
@@ -34,11 +34,7 @@
 </head>
 <body>
 <div id="app">
-    <span class="el-refresh" onclick='pageReload()'>
-        <el-tooltip content="刷新" placement="bottom" effect="light">
-            <i class="el-icon-refresh"></i>
-        </el-tooltip>
-    </span>
+    <refresh-comm></refresh-comm>
     <template>
         <!--搜索区域-->
         <el-form :model="ruleForm" :rules="rules"
@@ -111,7 +107,7 @@
             <el-table v-if="loading==false"
                       :data="tableData"
                       stripe
-                      height="660"
+                      :height="App.getIfmAutoHeight()-15"
                       tooltip-effect="dark"
                       @selection-change="handleSelectionChange"
                       style="width: 100%">
@@ -143,7 +139,7 @@
                 <el-table-column prop="product_name_value" label="商品名称" width="320">
                     <template slot-scope="scope">
                         <div class="smallImg"
-                             :style="{'backgroundImage': 'url(' + Shop.BASE_IMG_URL+scope.row.product_img_index_url + ')'}">
+                             :style="{'backgroundImage': 'url(' + BASE_IMG_URL+scope.row.product_img_index_url + ')'}">
                         </div>
                         <div style="display: flex; flex-direction: column;">
                             <span>{{scope.row.product_name_value}}</span>
@@ -214,15 +210,9 @@
                     </template>
                 </el-table-column>
             </el-table>
-
         </template>
-
-
     </div>
-
 </div>
-
-
 </body>
 
 <script>
@@ -271,17 +261,17 @@
 
         created: function () {
             //加载商品分类
-            Shop.getBaseListApi(global_api_url + "productType", data => {
+            App.getBaseListApi(global_api_url + "productType", data => {
                 this.productTypeData = data;
             });
 
             //加载枚举销售模式
-            Shop.getEnumListApi(global_api_url + "productSaleModelEnum", data => {
+            App.getEnumListApi(global_api_url + "productSaleModelEnum", data => {
                 this.productSaleModelData = data;
             });
 
             //加载标签
-            Shop.getBaseListApi(global_api_url + "productTag", data => {
+            App.getBaseListApi(global_api_url + "productTag", data => {
                 this.productTagData = data;
             });
 
@@ -297,7 +287,7 @@
             formatDate: function (time) {
                 if (time != null && time != "") {
                     var date = new Date(time);
-                    return Shop.formatDate(date, "yyyy-MM-dd");
+                    return App.formatDate(date, "yyyy-MM-dd");
                 } else {
                     return "";
                 }
@@ -312,7 +302,7 @@
             getProductList: function () {
                 this.loading = true;
                 //搜索
-                let searchData = Shop.jsonToParams(this.ruleForm);
+                let searchData = App.jsonToParams(this.ruleForm);
                 //apiURL
                 let apiURL = global_api_url + "product/list?current=" + this.page.current + searchData;
                 //搜索
@@ -320,7 +310,7 @@
                 //调用ajax取数据
                 axios.get(apiURL).then(rs => {
 
-                    console.log("getProductList==>",rs);
+                    console.log("getProductList==>", rs);
 
                     if (rs.data.code == 0) {
                         rs = rs.data;
@@ -329,9 +319,9 @@
                         //分页
                         this.page = {
                             current: rs.data.current,
-                            pages  : rs.data.pages,
-                            size   : rs.data.size,
-                            total  : rs.data.total
+                            pages: rs.data.pages,
+                            size: rs.data.size,
+                            total: rs.data.total
                         };
                         //加载完毕
                         this.loading = false;
@@ -347,21 +337,21 @@
              * 删除操作
              */
             delProduct: function (idstr) {
-                let _this = this;
                 //apiURL
-                let apiURL = _this.baseApi + "product?idList=" + idstr;
-                //调用ajax取数据
-                Shop.ajax(_this, apiURL, function (rs) {
+                let apiURL = global_api_url + "product?idList=" + idstr;
+                //删除数据
+                axios.delete(apiURL).then(rs => {
                     //处理结果
-                    if (rs.code == 0) {
-                        _this.$message.success("删除成功！");
-                        setTimeout(function () {
-                            _this.getProductList();
-                        }, 1000);
+                    if (rs.data.code == 0) {
+                        this.$message.success("删除成功！");
+                        //让提示一会在加载数据
+                        setTimeout(t => this.getProductList(), 1000);
                     } else {
-                        _this.$message.error("错误消息：" + rs.message);
+                        this.$message.error("错误消息：" + rs.data.msg);
                     }
-                }, null, Shop.TYPE_DELETE);
+                }).catch(e => {
+                    alert(e);
+                });
             },
 
             /**
@@ -383,7 +373,7 @@
                 for (var row of val) {
                     this.multipleSelection.push(row.id);
                 }
-                console.log("ids====>>>" + this.multipleSelection.toString());
+                console.log("选择  ids====>>>" + this.multipleSelection.toString());
 
             },
 
@@ -391,7 +381,7 @@
              * 删除选中的行记录
              */
             delSelectRowClick: function () {
-                console.log("ids====>>>" + this.multipleSelection.toString());
+                console.log("删除 ids====>>>" + this.multipleSelection.toString());
 
                 this.delProduct(this.multipleSelection.toString());
             },
@@ -401,7 +391,7 @@
              * @param row
              */
             handleEdit: function (row) {
-                parent.app.addTab("编辑商品(编号：" + row.id + ")", "./product/add.html?id=" + row.id);
+                parent.app.addTab("编辑商品(编号：" + row.id + ")", "./product/form.html?id=" + row.id);
 
             },
             /**
@@ -442,7 +432,7 @@
                 }
             },
             add: function () {
-                parent.app.addTab("添加商品", "./product/add.html");
+                parent.app.addTab("添加商品", "./product/form.html");
             }
         }
     }

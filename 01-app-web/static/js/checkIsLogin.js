@@ -1,6 +1,6 @@
-let token  = Auth.getToken();
-var global_username = null;
-var global_authArr = [];
+const token           = Auth.getToken();
+let   global_username = null;
+let   global_authArr  = [];
 
 //判断
 if(token !=null && token !="") {

@@ -2,14 +2,10 @@
  * 小明哥
  * @type {{setAuth(*=): void, _getVal(*): (*|null), getAuth(): *, _getAuth(): void, getToken(): *, authObj: null, getUserName(): *, delAuth(): void, gotoLogin(*=): void, USER_AUTH_KEY: string, managerCenter(*=): void}}
  */
-
-//api访问地址，可修改
-let global_api_url = "http://localhost:8088/";
-//html所在路径
-let htmlPath = "views";
-
 let Auth = {
+
     USER_AUTH_KEY: "Authorization",
+
     authObj:null,
 
     /**
@@ -165,5 +161,4 @@ let Auth = {
         }
         return false;
     }
-
 }

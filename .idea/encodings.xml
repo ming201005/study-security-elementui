@@ -2,7 +2,5 @@
 <project version="4">
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/02-app-b2c/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/02-security-jwt-b2c/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/02-security-jwt-b2c/src/main/resources" charset="UTF-8" />
   </component>
 </project>

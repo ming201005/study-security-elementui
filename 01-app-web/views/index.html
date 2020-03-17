@@ -6,14 +6,12 @@
     <!--<link rel="icon" href="img/shop.ico" type="img/x-ico" />-->
     <link rel="stylesheet" href="../static/css/index.css">
     <link rel="stylesheet" href="../static/eui/element-ui.css">
-    <script src="../static/vue/vue.min.js"></script>
-    <script src="../static/vue/vue-resource.js"></script>
-    <script src="../static/eui/index.js"></script>
-    <script src="../static/comm/pageReload.js"></script>
-    <script src="../static/comm/shopComm.js"></script>
 
-
+    <script src="../static/js/vue.min.js"></script>
     <script src="../static/js/axios.min.js"></script>
+    <script src="../static/eui/index.js"></script>
+
+    <script src="../static/js/App.js"></script>
     <script src="../static/js/auth.js"></script>
     <script src="../static/js/checkIsLogin.js"></script>
 
@@ -176,11 +174,11 @@
             <!-- 嵌套容器 -->
             <el-container>
                 <!-- 侧边导航菜单 -->
-                <el-aside  v-bind:style="{height: asideHeight + 'px' }" width="200px">
+                <el-aside  v-bind:style="{height: App.getLeftMenuHeight() + 'px' }" width="200px">
 
                     <el-menu>
 
-                        <div class="home" @click='addTab("后台首页","./index/mainContainer.html")'>
+                        <div class="home" @click='addTab("后台首页","mainContainer.html")'>
                             <span><i class="el-icon-s-home"></i></span>
                             <span>后台首页</span>
                         </div>
@@ -209,7 +207,7 @@
                                 :key="item.name"
                                 :label="item.title"
                                 :name="item.name">
-                            <iframe  id="iframe" class="mainIframe" :src="item.content" :height="ifmAutoHeight"></iframe>
+                            <iframe  id="iframe" class="mainIframe" :src="item.content" :height="App.getIfmAutoHeight()"></iframe>
                         </el-tab-pane>
 
                     </el-tabs>
@@ -240,36 +238,18 @@
                 //默认打开的首页，且不可删除
                 indexMenu: {
                     name: "后台首页",
-                    url: "./index/mainContainer.html"
+                    url: "mainContainer.html"
                 },
                 //显示菜单树
-                menuList: Auth.getMenus(),
-                //左侧高度
-                asideHeight:0,
-                //iframe高度
-                ifmAutoHeight:0
+                menuList: Auth.getMenus()
             }
         },
         //初始化
         created: function () {
-            //初始化
-            this.init();
             //默认打开首页
             this.addTab(this.indexMenu.name, this.indexMenu.url);
         },
         methods: {
-            //初始化
-            init(){
-                //浏览器打开高度
-                var clientHeight = document.documentElement.clientHeight;
-
-                //console.log("clientHeight="+this.clientHeight)
-                //左侧高度
-                this.asideHeight = clientHeight-60;
-
-                //设置iframe自适高度
-                this.ifmAutoHeight = this.asideHeight-65;
-            },
 
             /**
              * 添加
@@ -326,6 +306,7 @@
                 }
 
                 this.menuTabsValue = activeName;
+
                 this.menuTabs = tabs.filter(tab => tab.name !== targetName);
             }
         }

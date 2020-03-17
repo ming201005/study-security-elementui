@@ -2,13 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>前端菜单</title>
-    <script src="../static/js/vue.js"></script>
-    <script src="../static/js/axios.min.js"></script>
-    <script src="../static/js/auth.js"></script>
-    <script src="../static/js/checkIsLogin.js"></script>
+    <title>api管理</title>
 
-    <link rel="stylesheet" href="../static/css/template.css">
+    <script src="../../static/js/vue.min.js"></script>
+    <script src="../../static/js/axios.min.js"></script>
+    <script src="../../static/eui/index.js"></script>
+
+    <script src="../../static/js/App.js"></script>
+    <script src="../../static/js/auth.js"></script>
+    <script src="../../static/js/checkIsLogin.js"></script>
+
+    <link rel="stylesheet" href="../../static/css/template.css">
+
 </head>
 <body>
 <div id="app">
@@ -21,18 +26,28 @@
         </div>
 
         <div class="item">
-            <label for="frontendMenuName">菜单名称：</label>
-            <input id="frontendMenuName" v-model="model.frontendMenuName">
+            <label for="backendApiName">API中文名：</label>
+            <input id="backendApiName" v-model="model.backendApiName">
         </div>
 
         <div class="item">
-            <label for="frontendMenuUrl">页面链接：</label>
-            <input   id="frontendMenuUrl" v-model="model.frontendMenuUrl">
+            <label for="backendApiUrl">请求地址：</label>
+            <input   id="backendApiUrl" v-model="model.backendApiUrl">
+            <span>请按AntPathMatcher支持的匹配规则填写</span>
         </div>
 
         <div class="item">
-            <label for="frontendMenuSort">排序：</label>
-            <input type="number" id="frontendMenuSort" v-model="model.frontendMenuSort">
+            <label>请求方式：</label>
+            <input type="checkbox"  v-model="backendApiMethods" value="GET">GET
+            <input type="checkbox"  v-model="backendApiMethods" value="POST">POST
+            <input type="checkbox"  v-model="backendApiMethods" value="PUT">PUT
+            <input type="checkbox"  v-model="backendApiMethods" value="DELETE">DELETE
+            <input type="checkbox"  v-model="backendApiMethods" value="OPTIONS">OPTIONS
+        </div>
+
+        <div class="item">
+            <label for="backendApiSort">排序：</label>
+            <input type="number" id="backendApiSort" v-model="model.backendApiSort">
             <span>务必填写，建议：分类一：100、101、102；分类二：200、201；以此类推</span>
         </div>
         <div class="item">
@@ -46,30 +61,31 @@
     </div>
 
     <div class="model_list">
-        <div class="button_group"
-             style="justify-content:left;border: 1px solid #A8A8A8; border-bottom: 0px; width: 99.8%;">
+        <div class="button_group line">
             <button @click="addNew" >新建</button>
             <button >删除</button>
         </div>
         <table width="100%" border="0" cellspacing="1" cellpadding="0">
             <tr class="h">
                 <td>父级</td>
-                <td>菜单名称</td>
-                <td>页面链接</td>
+                <td>API名称</td>
+                <td>请求地址</td>
+                <td>请求方式</td>
                 <td>排序</td>
                 <td>说明</td>
                 <td>操作</td>
             </tr>
 
-            <tr v-for="item in modelList" :style="item.pid==null? {backgroundColor:'#A8A8A8'}:{}">
+            <tr v-for="item in modelList" :style="(item.pid==null && item.backendApiId !=1)?  {backgroundColor:backgroundColor}:{}">
                 <td>{{item.parentName}}</td>
-                <td>{{item.pid==null? "+"+item.frontendMenuName:"—"+item.frontendMenuName}}</td>
-                <td>{{item.frontendMenuUrl}}</td>
-                <td>{{item.frontendMenuSort}}</td>
+                <td>{{item.pid==null? "+"+item.backendApiName:"—"+item.backendApiName}}</td>
+                <td>{{item.backendApiUrl}}</td>
+                <td>{{item.backendApiMethod}}</td>
+                <td>{{item.backendApiSort}}</td>
                 <td>{{item.description}}</td>
                 <td>
                     <button @click="editModel(item)">编辑</button>
-                    <button @click="del(item.frontendMenuId)">删除</button>
+                    <button @click="del(item.backendApiId)">删除</button>
                     <button @click="addChild(item)" v-if="item.pid==null">添加子菜单</button>
                 </td>
             </tr>
@@ -82,19 +98,23 @@
     let vue = new Vue({
         el: "#app",
         data: {
-            url : global_api_url+"sysFrontendMenuTable",
+            url : global_api_url+"sysBackendApiTable",
             //对象
             model:{
-                frontendMenuId:null,
-                frontendMenuName:null,
-                frontendMenuUrl:null,
+                backendApiId:null,
+                backendApiName:null,
+                backendApiUrl:null,
+                backendApiMethod:null,
                 parentName:null,
                 pid:null,
-                frontendMenuSort:null,
+                backendApiSort:null,
                 description:null
             },
+           // backendApiMethods:[],
             //列表
-            modelList:[]
+            modelList:[],
+            //父级背景颜色
+            backgroundColor:'#ECECEC'
         },
         created() {
             this.getModelList();
@@ -126,25 +146,25 @@
              */
             editModel(item){
                 this.model = item;
-                console.log(this.model);
+                console.log("编辑editModel---->",this.model);
             },
 
             /**
              * 想显示父节点名称的话，后端查询要自身表关联。
              */
             addChild(item) {
-                this.model = {};
                 //把当前的ID赋给子节点的pid
-                this.model.pid = item.frontendMenuId;
-                //把当前的菜单名赋给子节点父级名
-                this.model.parentName = item.frontendMenuName;
+                this.model = {};
+                this.model.pid = item.backendApiId;
+                //把当前的名赋给子节点父级名
+                this.model.parentName = item.backendApiName;
             },
 
             /**
              * 保存数据，包括新增、和编辑
              */
             save(){
-              if(this.model.frontendMenuId ==null){
+              if(this.model.backendApiId ==null){
                   this._add();
               }else{
                   this._edit();
@@ -190,11 +210,11 @@
             /**
              * 删除,如果要做批量删除。请传多个frontendMenuId，或者
              * 传“,”分开的id，例如：id=1,2,3,5,6。后端接收参数idList
-             * @param frontendMenuId
+             * @param backendApiId
              */
-            del(frontendMenuId) {
+            del(backendApiId) {
                 if(confirm('一旦删除，不可恢复，请确认。')){
-                    let url = this.url + "?idList="+frontendMenuId;
+                    let url = this.url + "?idList="+backendApiId;
                     axios.delete(url).then( rs => {
                         if(rs.data.code == 0) {
                             this.getModelList();
@@ -204,6 +224,26 @@
                     }).catch(err => {
                         console.log(err);
                     });
+                }
+            }
+        },
+        //计算属性
+        computed:{
+            backendApiMethods:{
+                get() {
+                    //把model.backendApiMethod转化成数组
+                    //model.backendApiMethod存储的是“,”分开的数据
+                    let arr = [];
+                    let methodStr = this.model.backendApiMethod;
+                    if (methodStr != null && methodStr !="") {
+                        arr = methodStr.split(",");
+                    }
+                    return arr;
+                },
+                set(val) {
+                    //有变化后，把值赋给model.backendApiMethod
+                    this.model.backendApiMethod = val.toString();
+                    console.log("计算属性computed -->this.model===>",this.model);
                 }
             }
         }

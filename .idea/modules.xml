@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/02-app-b2c/02-app-b2c.iml" filepath="$PROJECT_DIR$/02-app-b2c/02-app-b2c.iml" />
+      <module fileurl="file://$PROJECT_DIR$/02-app-b2c/b2c.iml" filepath="$PROJECT_DIR$/02-app-b2c/b2c.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/study-security-elementui.iml" filepath="$PROJECT_DIR$/.idea/study-security-elementui.iml" />
     </modules>
   </component>

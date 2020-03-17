@@ -5,16 +5,15 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="../../static/css/index.css">
     <link rel="stylesheet" href="../../static/eui/element-ui.css">
-    <script src="../../static/vue/vue.min.js"></script>
-    <script src="../../static/vue/vue-resource.js"></script>
-    <script src="../../static/eui/index.js"></script>
-    <script src="../../static/comm/pageReload.js"></script>
-    <script src="../../static/comm/shopComm.js"></script>
 
+    <script src="../../static/js/vue.min.js"></script>
     <script src="../../static/js/axios.min.js"></script>
+    <script src="../../static/eui/index.js"></script>
+
+    <script src="../../static/js/App.js"></script>
     <script src="../../static/js/auth.js"></script>
     <script src="../../static/js/checkIsLogin.js"></script>
-
+    <script src="../../static/js/RefreshComponent.js"></script>
     <style>
         body {
             font-size: 14px;
@@ -70,16 +69,7 @@
 </head>
 <body>
 <div id="app" v-loading="loading">
-
-    <span class="el-refresh"  onclick='pageReload()'>
-        <el-tooltip content="刷新" placement="bottom" effect="light">
-            <i class="el-icon-refresh"></i>
-        </el-tooltip>
-    </span>
-
-    <!--返回页面-->
-    <!--<el-page-header @back="goBack" content="添加商品"></el-page-header>-->
-
+    <refresh-comm></refresh-comm>
     <!--保存按钮-->
     <div class="buttonSpan">
         <el-button :disabled="stepNum<2?true:false" type="primary" @click="next(-1)">上一步</el-button>
@@ -249,12 +239,12 @@
                     <div class="imgItem" v-for="(item,index) in isCheckImgList">
                         <!--图片显示，用背景图的方式显示-->
                         <div class="imageShow"
-                             :style="{'backgroundImage': 'url(' + Shop.BASE_IMG_URL+item.resourceName + ')'}">
+                             :style="{'backgroundImage': 'url(' + BASE_IMG_URL+item.resourceName + ')'}">
                             <!--当被选中时，上边出现阴影遮住效果-->
                             <div>
                                 <div style="height: 20px;">
-                                    <span   size="mini" @click="Shop.delFielByIndex(index,isCheckImgList)" class="el-icon-delete showHide"></span>
-                                    <!--<span   size="mini" @click="viewImg(Shop.BASE_IMG_URL+item.resourceName)" class="el-icon-view showHide"></span>-->
+                                    <span size="mini" @click="App.delFileByIndex(index,isCheckImgList)" class="el-icon-delete showHide"></span>
+                                    <!--<span size="mini" @click="viewImg(BASE_IMG_URL+item.resourceName)" class="el-icon-view showHide"></span>-->
                                 </div>
                             </div>
 
@@ -302,20 +292,9 @@
 </body>
 
 <script>
+
     var Main = {
         data() {
-            /**
-             * 检查双精度的数字类型（如：销售价）
-             */
-            var isDouble = (rule, value, callback) => {
-                var expStr = /^\d+$|^\d+[.]?\d+$/
-                if (!expStr.test(value)) {
-                    callback(new Error('销售价是数字类型。'))
-                }else{
-                    callback()
-                }
-            };
-
             return {
                 baseApi:'',
                 //页面加载状态控制
@@ -356,7 +335,7 @@
                     ],
                     productSalePrice: [
                         {required: true,  message: '销售价不能为空', trigger: 'blur'},
-                        { validator: isDouble, trigger: 'blur' }
+                        { validator: App.isDouble, trigger: 'blur' }
                     ],
                     productSaleUnitId:[
                         {required: true, message: '请选择单位', trigger: 'change'}
@@ -387,25 +366,25 @@
         created: function () {
 
             //取商品id
-            this.productId = Shop.getParameter("id");
+            this.productId = App.getParameter("id");
 
             //加载商品分类
-            Shop.getBaseListApi(global_api_url + "productType", data => {
+            App.getBaseListApi(global_api_url + "productType", data => {
                 this.productTypeData = data;
             });
 
             //加载枚举销售模式
-            Shop.getEnumListApi(global_api_url + "productSaleModelEnum", data => {
+            App.getEnumListApi(global_api_url + "productSaleModelEnum", data => {
                 this.productSaleModelData = data;
             });
 
             //加载标签
-            Shop.getBaseListApi(global_api_url + "productTag", data => {
+            App.getBaseListApi(global_api_url + "productTag", data => {
                 this.productTagData = data;
             });
 
             //加载单位
-            Shop.getBaseListApi(global_api_url + "productUnit", data => {
+            App.getBaseListApi(global_api_url + "productUnit", data => {
                 this.productSaleUnitData = data;
             });
 
@@ -528,9 +507,9 @@
                 console.log("validate result==>",result);
                 if(result.rs) {
                     //提交
-                    if(result.type === Shop.TYPE_POST )
-                        this.add(apiURL,result.data,result.msg);
-                    else if(result.type === Shop.TYPE_PUT)
+                    if(result.type === App.TYPE_POST )
+                        this.form(apiURL,result.data,result.msg);
+                    else if(result.type === App.TYPE_PUT)
                         this.edit(apiURL,result.data,result.msg);
                 }else{
                     this.$message.error(result.msg);
@@ -593,7 +572,7 @@
                     if(valid) {
 
                         //默认是新增
-                        let callType = Shop.TYPE_POST;
+                        let callType = App.TYPE_POST;
                         let message  = "新增成功！";
 
                         //---------------------------------------------------------------------------
@@ -616,7 +595,7 @@
                         //return;
                         if (_this.productId>0){
                             //当id大于0，说明是修改
-                            callType = Shop.TYPE_PUT;
+                            callType = App.TYPE_PUT;
                             message  = "修改成功！";
                         }
                         result = {
@@ -727,6 +706,5 @@
     }
     var Ctor = Vue.extend(Main)
     var app = new Ctor().$mount('#app');
-
 </script>
 </html>

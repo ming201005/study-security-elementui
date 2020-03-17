@@ -5,15 +5,15 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="../../static/css/index.css">
     <link rel="stylesheet" href="../../static/eui/element-ui.css">
-    <script src="../../static/vue/vue.min.js"></script>
-    <script src="../../static/vue/vue-resource.js"></script>
-    <script src="../../static/eui/index.js"></script>
-    <script src="../../static/comm/pageReload.js"></script>
-    <script src="../../static/comm/shopComm.js"></script>
 
+    <script src="../../static/js/vue.min.js"></script>
     <script src="../../static/js/axios.min.js"></script>
+    <script src="../../static/eui/index.js"></script>
+
+    <script src="../../static/js/App.js"></script>
     <script src="../../static/js/auth.js"></script>
     <script src="../../static/js/checkIsLogin.js"></script>
+    <script src="../../static/js/RefreshComponent.js"></script>
 
     <style>
         body {
@@ -72,11 +72,7 @@
 </head>
 <body>
 <div id="app" v-loading="loading" style="display: flex;">
-    <span class="el-refresh"  onclick='pageReload()'>
-        <el-tooltip content="刷新" placement="bottom" effect="light">
-            <i class="el-icon-refresh"></i>
-        </el-tooltip>
-    </span>
+    <refresh-comm></refresh-comm>
 
     <leftCel>
         <div style="width: 180px;">  </div>
@@ -93,12 +89,12 @@
                  @mouseenter="enter(index)" @mouseleave="leave()">
                 <!--图片显示，用背景图的方式显示-->
                 <div class="imageShow"  @click="chooseData(index,item)"
-                     :style="{'backgroundImage': 'url(' + Shop.BASE_IMG_URL+item.resourceName + ')'}">
+                     :style="{'backgroundImage': 'url(' + BASE_IMG_URL+item.resourceName + ')'}">
                     <!--当被选中时，上边出现阴影遮住效果-->
                     <div :class="item.check?'selectCheck':''">
                         <div style="height: 20px;">
                             <span   size="mini" @click="del(item)" class="el-icon-delete showHide" v-show="seen&&index==selectIndex"  ></span>
-                            <span   size="mini" @click="viewImg(Shop.BASE_IMG_URL+item.resourceName)" class="el-icon-view showHide" v-show="seen&&index==selectIndex" ></span>
+                            <span   size="mini" @click="viewImg(BASE_IMG_URL+item.resourceName)" class="el-icon-view showHide" v-show="seen&&index==selectIndex" ></span>
                         </div>
                         <div class="nameSpan">{{item.resourceName}}</div>
                         <!--选中打钩效果-->
@@ -205,14 +201,14 @@
              */
             init() {
                 //加载商品分类
-                Shop.getBaseListApi(global_api_url+"resourceType",data=>{
+                App.getBaseListApi(global_api_url+"resourceType", data=>{
                     this.resourceTypeData = data;
                 });
 
                 //默认加载文件
                 this.getPicList();
 
-                this.fromPage = Shop.getParameter("fromPage");
+                this.fromPage = App.getParameter("fromPage");
 
                 //添加产品图片
                 //如果是从产品页面打开的窗体
@@ -312,7 +308,7 @@
                     row.check = false;
                     this.imgList.splice(index, 1, row);
                     //根据id删掉
-                    Shop.delFielById(row, this.isCheckImgList);
+                    App.delFileById(row, this.isCheckImgList);
                     this.isCheckImgListLen--;
                 }
                 console.log("已选中：", this.isCheckImgList);
@@ -406,7 +402,7 @@
                         //查找并返回下标
                         let findIndex = this.imgList.findIndex(item=>item.id === id);
                         // 然后删除
-                        Shop.delFielById(findIndex, this.imgList);
+                        App.delFileById(findIndex, this.imgList);
                         this.$message.success("删除成功！");
 
                         //方案2：遍历查找并删除客户端的数据
@@ -415,7 +411,7 @@
                             //删除
                             if (this.imgList[index].id==id) {
                                 this.imgList.splice(index, 1);
-                                Shop.delFielById(this.imgList[index], this.imgList);
+                                App.delFileById(this.imgList[index], this.imgList);
                                 this.$message.success("删除成功！");
                                 break;
                             }

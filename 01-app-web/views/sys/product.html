@@ -3,12 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <title>商品管理</title>
-    <script src="../static/js/vue.js"></script>
-    <script src="../static/js/axios.min.js"></script>
-    <script src="../static/js/auth.js"></script>
-    <script src="../static/js/checkIsLogin.js"></script>
 
-    <link rel="stylesheet" href="../static/css/template.css">
+    <script src="../../static/js/vue.min.js"></script>
+    <script src="../../static/js/axios.min.js"></script>
+    <script src="../../static/eui/index.js"></script>
+
+    <script src="../../static/js/App.js"></script>
+    <script src="../../static/js/auth.js"></script>
+    <script src="../../static/js/checkIsLogin.js"></script>
+
+    <link rel="stylesheet" href="../../static/css/template.css">
 
 </head>
 <body>
@@ -38,8 +42,7 @@
     </div>
 
     <div class="model_list">
-        <div class="button_group"
-             style="justify-content:left;border: 1px solid #A8A8A8; border-bottom: 0px; width: 99.8%;">
+        <div class="button_group line">
             <button @click="addNew" >新建</button>
             <button >删除</button>
         </div>

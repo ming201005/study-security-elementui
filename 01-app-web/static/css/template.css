@@ -5,17 +5,29 @@ body{
     width: 100%;
     margin: auto;
 }
+
+/*浮动窗口*/
 .model_box{
+    /*定义绝对位置浮动窗口*/
+    position: absolute;
+    top: 120px;
+    left: 100px;
+    width: 80%;
     display: flex;
     flex-flow: wrap;
-    border: 1px solid #A8A8A8;
+    border: 2px solid #e9e9eb;
     background-color: #FFFFFF;
+    /* 老的 Firefox */
+    -moz-box-shadow: 10px 10px 5px #888888;
+    box-shadow: 3px 3px 6px #888888;
 }
+
+
 .item {
     width: 100%;
     margin: 10px 0 0 0 ;
     padding-bottom: 5px;
-    border-bottom: 1px solid #A8A8A8;
+    border-bottom: 1px solid #ededed;
 }
 .item label {
     display: inline-block;
@@ -27,8 +39,29 @@ body{
     width: 100%;
     height: 100%;
     justify-content: center;
-    background-color: #F2F2F2;
+    background-color: #ECECEC;
 }
+
+.line {
+    justify-content:left;
+    border: 1px solid #e9e9eb;
+    width: 99.8%;
+    text-align: left;
+}
+
+.button_group label{
+    padding: 5px 10px;
+    width: 93%;
+    text-align: left;
+    font-weight: bold;
+    cursor : move;
+}
+.button_group span{
+    padding: 5px 10px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
 .button_group button{
     margin: 5px;
 }
@@ -36,7 +69,7 @@ body{
     margin-top: 20px;
 }
 .model_list table {
-    background:#A8A8A8;
+    background:#ededed;
 }
 .model_list table tr {
     background:#FFFFFF;
@@ -44,7 +77,7 @@ body{
 }
 /*斑马效果*/
 .model_list table tr:nth-child(even){
-    background-color:#F0F0F0;
+    background-color: #f6f6f6;
 }
 /*头部*/
 .model_list table .h {
@@ -55,4 +88,28 @@ body{
 /*列空隙*/
 .model_list table tr td {
     padding: 5px;
+}
+
+
+/* 权限-分配资源相关页面css*/
+.role {
+    display: flex;
+    justify-content: space-between;
+}
+
+.role .left {
+    width: 40%;
+    height: 800px;
+    padding: 2px;
+    background-color: #ECECEC;
+}
+
+.role .rigth {
+    width: 58%;
+}
+table tr td {
+    text-align: left;
+}
+.selectRow {
+    background-color: #80bdff;
 }

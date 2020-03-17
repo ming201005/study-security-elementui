@@ -3,13 +3,18 @@
 <head>
     <meta charset="UTF-8">
 
-    <link rel="stylesheet" href="../../static/css/index.css">
-    <link rel="stylesheet" href="../../static/eui/element-ui.css">
-    <script src="../../static/vue/vue.min.js"></script>
-    <script src="../../static/vue/vue-resource.js"></script>
-    <script src="../../static/eui/index.js"></script>
-    <script src="../../static/comm/pageReload.js"></script>
-    <script src="../../static/comm/shopComm.js"></script>
+    <link rel="stylesheet" href="../static/css/index.css">
+    <link rel="stylesheet" href="../static/eui/element-ui.css">
+
+    <script src="../static/js/vue.min.js"></script>
+    <script src="../static/js/axios.min.js"></script>
+    <script src="../static/eui/index.js"></script>
+
+    <script src="../static/js/App.js"></script>
+    <script src="../static/js/auth.js"></script>
+    <script src="../static/js/checkIsLogin.js"></script>
+    <script src="../static/js/RefreshComponent.js"></script>
+
     <style>
         body {
             font-size: 14px;
@@ -149,11 +154,7 @@
 </head>
 <body>
 <div id="app">
-     <span class="el-refresh"  onclick='pageReload()'>
-        <el-tooltip content="刷新" placement="bottom" effect="light">
-            <i class="el-icon-refresh"></i>
-        </el-tooltip>
-    </span>
+    <refresh-comm></refresh-comm>
     <div class="main">
         <div class="mianLeft">
             <div class="mianLeft_row">
@@ -215,7 +216,7 @@
 
 
             <div class="mianLeft_yx">
-                <img src="../../static/img/analysis.jpg">
+                <img src="../static/img/analysis.jpg">
             </div>
 
         </div>

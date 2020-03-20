@@ -11,184 +11,144 @@
     <script src="../../static/js/App.js"></script>
     <script src="../../static/js/auth.js"></script>
     <script src="../../static/js/checkIsLogin.js"></script>
+    <script src="../../static/js/FormBoxComponent.js"></script>
+    <script src="../../static/js/DataListComponent.js"></script>
 
     <link rel="stylesheet" href="../../static/css/template.css">
-
 </head>
 <body>
 <div id="app">
+    <!--引用form-box-comm组件-->
+    <form-box-comm ref="myForm"
+                   :box-title="boxTitle"
+                   :add-api-url="url"
+                   :edit-api-url="url"
+                   :model="model"
+                   :id-key="model.productId"
+                   :on-validate="formValidateHandler"
+                   :on-success="successHandler">
 
-    <div class="model_box">
+        <!--添加自己的元素-->
+        <template>
+            <div class="item">
+                <label for="productName">商品名称：</label>
+                <input id="productName" v-model="model.productName">
+            </div>
 
+            <div class="item">
+                <label for="num">库存量：</label>
+                <input id="num" v-model="model.num">
+            </div>
 
-        <div class="item">
-            <label for="productName">商品名称：</label>
-            <input id="productName" v-model="model.productName">
-        </div>
+            <div class="item">
+                <label for="price">市场价：</label>
+                <input id="price" v-model="model.price">
+            </div>
+        </template>
+        <!--添加自己的元素 结束-->
+    </form-box-comm>
 
-        <div class="item">
-            <label for="num">库存量：</label>
-            <input id="num" v-model="model.num">
-        </div>
-
-        <div class="item">
-            <label for="price">市场价：</label>
-            <input id="price" v-model="model.price">
-        </div>
-        <div class="button_group">
-            <button @click="save" >保存</button>
-            <button >取消</button>
-        </div>
-    </div>
-
-    <div class="model_list">
-        <div class="button_group line">
-            <button @click="addNew" >新建</button>
-            <button >删除</button>
-        </div>
-        <table width="100%" border="0" cellspacing="1" cellpadding="0">
-            <tr class="h">
-                <td width="25%">商品编号</td>
-                <td>商品名称</td>
-                <td>库存量</td>
-                <td>市场价</td>
-                <td>操 作</td>
-            </tr>
-
-            <tr v-for="item in modelList">
-                <td>{{item.productId}}</td>
-                <td>{{item.productName}}</td>
-                <td>{{item.num}}</td>
-                <td>{{item.price}}</td>
-                <td>
-                    <button @click="editModel(item)" >编辑</button>
-                    <button @click="del(item.productId)" >删除</button>
-                </td>
-            </tr>
-        </table>
-    </div>
-
+    <!--引用data-list-comm组件-->
+    <data-list-comm ref="myList"
+                    :list-api-url="url"
+                    :delete-api-url="url"
+                    :model-attr="modelAttr"
+                    row-id-key="productId"
+                    :on-add-new-form="onAddNewFormHandler"
+                    :on-edit-form="onEditFormHandler"
+                    is-page="true"></data-list-comm>
 </div>
 <script>
 
     let vue = new Vue({
         el: "#app",
         data: {
-            url : global_api_url+"productTable",
+            boxTitle: '新增商品',
+            url: global_api_url + "productTable",
+            //表单的对象
+            // 表单的对象不一定和列表表单字段一样，所以单独定义
             //对象
-            model:{
-                productId:null,
-                productName:null,
-                num:0,
-                price:0.00
+            model: {
+                productId: null,
+                productName: null,
+                num: 0,
+                price: 0.00
             },
-            //列表
-            modelList:[]
+
+            //列表的表单头，支持的定义格式如下：
+            modelAttr: [
+                {
+                    display: '商品编号',
+                    attribute: 'productId'
+                },
+                {
+                    display: '商品名称',
+                    attribute: 'productName'
+                },
+                {
+                    display: '库存量',
+                    attribute: 'num'
+                },
+                {
+                    display: '市场价',
+                    attribute: 'price'
+                }
+            ]
         },
         created() {
-            this.getModelList();
+
         },
         methods: {
-            //查询列表
-            getModelList() {
-                axios.get(this.url).then(rs => {
-                    if(rs.data.code == 0) {
-                        console.log(rs.data.data);
-                        //注意后台调用的是分页的API
-                        this.modelList = rs.data.data.records;
-                    }else{
-                        alert(rs.data.msg);
-                    }
-                }).catch(err => {
-                    console.log("错误信息==》",err);
-                });
+            /**
+             * 挂载表单保存数据前，验证方法
+             * 这个方法必须有true/false返回值
+             */
+            formValidateHandler(model) {
+                //console.log(model);
+                if (model.productName == null || model.productName == "") {
+                    alert("商品名称必须输入！");
+                    return false;
+                } else if (model.price == null || model.price == "") {
+                    alert("市场价必须输入！");
+                    return false;
+
+                } else {
+                    return true;
+                }
             },
 
             /**
-             * 准备新增
+             * 数据保存成功后执行
              */
-            addNew(){
+            successHandler(data) {
+                //console.log(data);
+                this.$refs.myList.getModelList();
+                this.$refs.myForm.closeForm();
+            },
+
+            /**
+             * 挂载新建表单方法
+             */
+            onAddNewFormHandler() {
+                //恢复原样
                 this.model = {};
+                //打开窗口
+                this.$refs.myForm.showForm();
+                this.boxTitle = '新增商品';
             },
 
             /**
-             * 准备编辑的数据
+             * 挂载获得编辑表单方法
              */
-            editModel(item){
+            onEditFormHandler(item) {
+                //打开窗口
+                this.$refs.myForm.showForm();
+                this.boxTitle = `正在修改[${item.productName}]`;
+                //赋值
                 this.model = item;
             },
-
-
-            /**
-             * 保存数据，包括新增、和编辑
-             */
-            save(){
-                if(this.model.productId ==null){
-                    this._add();
-                }else{
-                    this._edit();
-                }
-            },
-
-            /**
-             * 新增
-             */
-            _add() {
-                console.log("here  add...............")
-
-                axios.post(this.url, this.model).then( rs => {
-                    if(rs.data.code == 0) {
-                        this.model = rs.data.data;
-                        this.getModelList();
-                    }else{
-                        alert(rs.data.msg);
-                    }
-                }).catch(err => {
-                    console.log(err);
-                });
-            },
-
-            /**
-             * 编辑
-             * @param item
-             */
-            _edit() {
-                console.log("here  edit...............")
-                axios.put(this.url, this.model).then( rs => {
-                    if(rs.data.code == 0) {
-
-                        this.getModelList();
-                    }else{
-                        alert(rs.data.msg);
-                    }
-                }).catch(err => {
-                    console.log(err);
-                });
-            },
-
-            /**
-             * 删除,如果要做批量删除。请传多个frontendMenuId，或者
-             * 传“,”分开的id，例如：id=1,2,3,5,6。后端接收参数idList
-             * @param roleId
-             */
-            del(roleId) {
-                if(confirm('一旦删除，不可恢复，请确认。')){
-                    let url = this.url + "?idList="+roleId;
-                    axios.delete(url).then( rs => {
-                        if(rs.data.code == 0) {
-                            this.getModelList();
-                        }else{
-                            alert(rs.data.msg);
-                        }
-                    }).catch(err => {
-                        console.log(err);
-                    });
-                }
-            }
-
         }
     });
-
 </script>
 </body>
 </html>

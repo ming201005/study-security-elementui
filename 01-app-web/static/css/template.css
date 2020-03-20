@@ -6,20 +6,24 @@ body{
     margin: auto;
 }
 
-/*浮动窗口*/
-.model_box{
+/*表单窗口*/
+.model_form{
+    display: flex;
+    flex-flow: wrap;
+    border: 2px solid #e9e9eb;
+    background-color: #FFFFFF;
+}
+
+.flow {
     /*定义绝对位置浮动窗口*/
     position: absolute;
     top: 120px;
     left: 100px;
     width: 80%;
-    display: flex;
-    flex-flow: wrap;
-    border: 2px solid #e9e9eb;
-    background-color: #FFFFFF;
-    /* 老的 Firefox */
-    -moz-box-shadow: 10px 10px 5px #888888;
-    box-shadow: 3px 3px 6px #888888;
+
+    /* Firefox */
+    -moz-box-shadow: 3px 3px 8px 5px #C5C5C5;
+    box-shadow: 3px 3px 8px 5px #C5C5C5;
 }
 
 
@@ -39,19 +43,19 @@ body{
     width: 100%;
     height: 100%;
     justify-content: center;
-    background-color: #ECECEC;
+    background-color: #E6E6E6;
 }
 
 .line {
     justify-content:left;
-    border: 1px solid #e9e9eb;
+    border: 1px solid #E6E6E6;
     width: 99.8%;
     text-align: left;
 }
 
 .button_group label{
     padding: 5px 10px;
-    width: 93%;
+    width: 92%;
     text-align: left;
     font-weight: bold;
     cursor : move;
@@ -66,7 +70,7 @@ body{
     margin: 5px;
 }
 .model_list{
-    margin-top: 20px;
+    margin-top: 8px;
 }
 .model_list table {
     background:#ededed;

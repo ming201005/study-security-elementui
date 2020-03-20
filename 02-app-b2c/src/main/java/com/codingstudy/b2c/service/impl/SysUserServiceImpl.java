@@ -100,8 +100,11 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUserEntity
             po.setUserId(vo.getId());
             po.setUserName(vo.getName());
             po.setDescription(vo.getDes());
-            //对密码进行加密
-            po.setPassWord(bCryptPasswordEncoderUtil.encode(vo.getPassw()));
+            //如果密码为空，就不加密，不对密码进行修改转换
+            if(vo.getPassw() !=null) {
+                //对密码进行加密
+                po.setPassWord(bCryptPasswordEncoderUtil.encode(vo.getPassw()));
+            }
             //设置状态为1
             po.setState(USER_STATE);
         }

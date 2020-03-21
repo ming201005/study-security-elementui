@@ -1,5 +1,6 @@
 /**
- * 表单弹窗组件
+ *  基于vue组件化封装
+ *  表单弹窗组件
  */
 Vue.component('form-box-comm', {
     //模板
@@ -56,16 +57,19 @@ Vue.component('form-box-comm', {
         model: null,
         //ID_KEY,表单唯一标识符，如ID
         idKey: null,
+
         //验证函数
         onValidate:{
             type:Function,
             default: null
         },
+
         //保存前执行
         beforeSave:{
             type:Function,
             default: null
         },
+
         //保存成功后执行函数
         onSuccess : {
             type:Function,

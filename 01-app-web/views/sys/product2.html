@@ -2,10 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>用户管理</title>
-
-    <link rel="stylesheet" href="../../static/css/index.css">
-    <link rel="stylesheet" href="../../static/eui/element-ui.css">
+    <title>商品管理</title>
 
     <script src="../../static/js/vue.min.js"></script>
     <script src="../../static/js/axios.min.js"></script>
@@ -16,90 +13,87 @@
     <script src="../../static/js/checkIsLogin.js"></script>
     <script src="../../static/js/FormBoxComponent.js"></script>
     <script src="../../static/js/DataListComponent.js"></script>
-    <script src="../../static/js/RefreshComponent.js"></script>
 
     <link rel="stylesheet" href="../../static/css/template.css">
 </head>
 <body>
 <div id="app">
-    <refresh-comm></refresh-comm>
-
     <!--引用form-box-comm组件-->
     <form-box-comm ref="myForm"
-                   :form-type="0"
                    :box-title="boxTitle"
-                   :add-api-url="url+'/register'"
+                   :add-api-url="url"
                    :edit-api-url="url"
                    :model="model"
-                   :id-key="model.id"
+                   :id-key="model.productId"
                    :on-validate="formValidateHandler"
                    :on-success="successHandler">
 
         <!--添加自己的元素-->
         <template>
             <div class="item">
-                <label for="name">用户名称：</label>
-                <input id="name" v-model="model.name">
+                <label for="productName">商品名称：</label>
+                <input id="productName" v-model="model.productName">
             </div>
 
             <div class="item">
-                <label for="passw">用户密码：</label>
-                <input type="password" id="passw" v-model="model.passw">
-                <span>初始密码：000000</span>
+                <label for="num">库存量：</label>
+                <input id="num" v-model="model.num">
             </div>
 
             <div class="item">
-                <label for="des">说明：</label>
-                <input id="des" v-model="model.des">
+                <label for="price">市场价：</label>
+                <input id="price" v-model="model.price">
             </div>
-
         </template>
         <!--添加自己的元素 结束-->
     </form-box-comm>
 
     <!--引用data-list-comm组件-->
     <data-list-comm ref="myList"
-                    :list-api-url="url+'/search'"
+                    :list-api-url="url"
                     :delete-api-url="url"
                     :model-attr="modelAttr"
-                    row-id-key="userId"
+                    row-id-key="productId"
                     :on-add-new-form="onAddNewFormHandler"
-                    :on-edit-form="onEditFormHandler"></data-list-comm>
-
+                    :on-edit-form="onEditFormHandler"
+                    is-page="true"></data-list-comm>
 </div>
 <script>
 
     let vue = new Vue({
         el: "#app",
         data: {
-            boxTitle: '新增用户信息',
-            url: global_api_url + "user",
-            //用户测试密码
-            defaultPassWord: '000000',
-
+            boxTitle: '新增商品',
+            url: global_api_url + "productTable",
             //表单的对象
             // 表单的对象不一定和列表表单字段一样，所以单独定义
+            //对象
             model: {
-                id: null,
-                name: null,
-                passw: this.defaultPassWord,
-                des: null
+                productId: null,
+                productName: null,
+                num: 0,
+                price: 0.00
             },
 
             //列表的表单头，支持的定义格式如下：
             modelAttr: [
                 {
-                    display: '编码',
-                    attribute: 'userId'
+                    display: '商品编号',
+                    attribute: 'productId'
                 },
                 {
-                    display: '用户名称',
-                    attribute: 'userName'
+                    display: '商品名称',
+                    attribute: 'productName'
                 },
                 {
-                    display: '描述',
-                    attribute: 'description'
-                }]
+                    display: '库存量',
+                    attribute: 'num'
+                },
+                {
+                    display: '市场价',
+                    attribute: 'price'
+                }
+            ]
         },
         created() {
 
@@ -111,11 +105,15 @@
              */
             formValidateHandler(model) {
                 //console.log(model);
-                if (model.name != null && model.name != "") {
-                    return true;
-                } else {
-                    alert("请输入用户名称！");
+                if (model.productName == null || model.productName == "") {
+                    alert("商品名称必须输入！");
                     return false;
+                } else if (model.price == null || model.price == "") {
+                    alert("市场价必须输入！");
+                    return false;
+
+                } else {
+                    return true;
                 }
             },
 
@@ -134,10 +132,9 @@
             onAddNewFormHandler() {
                 //恢复原样
                 this.model = {};
-                this.model.passw = this.defaultPassWord;
                 //打开窗口
                 this.$refs.myForm.showForm();
-                this.boxTitle = '新增用户信息';
+                this.boxTitle = '新增商品';
             },
 
             /**
@@ -146,17 +143,12 @@
             onEditFormHandler(item) {
                 //打开窗口
                 this.$refs.myForm.showForm();
-                this.boxTitle = `正在修改[${item.userName}]`;
+                this.boxTitle = `正在修改[${item.productName}]`;
                 //赋值
-                this.model.id = item.userId;
-                this.model.name = item.userName;
-                //不允许在这里修改密码
-                this.model.passw = null;
-                this.model.des = item.description;
+                this.model = item;
             },
         }
     });
-
 </script>
 </body>
 </html>

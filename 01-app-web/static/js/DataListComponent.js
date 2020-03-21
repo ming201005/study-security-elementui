@@ -83,8 +83,8 @@ Vue.component('data-list-comm', {
     computed: {
         //默认情况下有操作事件
         option() {
-            //console.log(this.optionShow);
-            if (this.optionShow == null) {
+            console.log("optionShow==",this.optionShow);
+            if (this.optionShow === undefined) {
                 return true;
             } else {
                 return this.optionShow;

@@ -160,6 +160,7 @@
                     </el-col>
                     <el-col :span="12" style="display: flex;justify-content:flex-end;padding-top: 8px">
                         <el-dropdown>
+                            <span style="color: #FFF;"> 欢迎：{{Auth.getUserName()}}</span>
                             <el-avatar :size="45" :src="circleUrl"></el-avatar>
                             <el-dropdown-menu slot="dropdown">
                                 <el-dropdown-item>账号信息</el-dropdown-item>

@@ -26,6 +26,7 @@ Vue.component('form-box-comm', {
         return{
             isShow: false,
             //默认是浮动的表单
+            //VUE绑定CSS有了解，要对拖动布局模式有了解。
             formClass:['model_form',"flow"],
         }
     },
@@ -49,14 +50,14 @@ Vue.component('form-box-comm', {
         formType:null,
         //标题
         boxTitle: "新增",
-        //新增地址
-        addApiUrl: null,
-        //编辑地址
-        editApiUrl: null,
         //表单模型
         model: null,
         //ID_KEY,表单唯一标识符，如ID
         idKey: null,
+        //新增地址
+        addApiUrl: null,
+        //编辑地址
+        editApiUrl: null,
 
         //验证函数
         onValidate:{

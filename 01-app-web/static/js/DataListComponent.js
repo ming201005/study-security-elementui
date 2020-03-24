@@ -50,28 +50,33 @@ Vue.component('data-list-comm', {
     props: {
         //查询列表的API URL
         listApiUrl: null,
+
         //行ID
         rowIdKey: null,
         //删除当前行记录的API URL
         deleteApiUrl: null,
         //表单头
         modelAttr: [],
+
         //新建表单
         onAddNewForm: {
             type: Function,
             default: null
         },
+
         //编辑表单获得数据
         onEditForm: {
             type: Function,
             default: null
         },
+
         //是否需要操作
         optionShow: true,
+
         //是否有分页
         isPage: true,
         //是否把查询方法执行权交给父组件
-        refParent:true
+        refParent:false
     },
     created() {
         //如果没有设置父组件执行权，在组件内执行
@@ -95,14 +100,13 @@ Vue.component('data-list-comm', {
     methods: {
 
         /**
-         * 查询列表数据，此方法必须用async修饰，在父组件中才能取到。
          * @returns {Promise<void>}
          */
-        async getModelList() {
+          getModelList() {
             console.log("正在执行 getModelList。。。。。。。。")
             if (this.listApiUrl != null && this.listApiUrl != "") {
                 //设置等待
-                await axios.get(this.listApiUrl).then(rs => {
+                  axios.get(this.listApiUrl).then(rs => {
                     if (rs.data.code == 0) {
                         //如果是后台已经分页返回来的值
                         if (this.isPage) {

@@ -2,11 +2,103 @@
 <html lang="en">
 <head>
 
+    <title>测试我的新组件</title>
+    <meta charset="UTF-8">
+
+    <link rel="stylesheet" href="../static/css/index.css">
+    <link rel="stylesheet" href="../static/eui/element-ui.css">
+
+    <link rel="stylesheet" href="../static/css/template.css">
+
+    <script src="../static/js/vue.min.js"></script>
+    <script src="../static/js/axios.min.js"></script>
+    <script src="../static/eui/index.js"></script>
+
+    <!--    <script src="../static/js/App.js"></script>-->
+    <!--    <script src="../static/js/auth.js"></script>-->
+    <!--    <script src="../static/js/checkIsLogin.js"></script>-->
+    <!--    <script src="../static/js/RefreshComponent.js"></script>-->
+    <script src="../static/js/FormComm.js"></script>
+
 </head>
 <body>
+<div id="app">
+    <form-comm ref="myForm"
+               :form-type="1"
+               :model="model"
+               :box-title = "boxTitle"
+               :add-api-url ="url"
+               :edit-api-url = "url"
+               :id-key = "model.productId">
+        <!--添加自己的元素-->
+        <template>
+            <div class="item">
+                <label for="productName">商品名称：</label>
+                <input id="productName" v-model="model.productName">
+            </div>
 
+            <div class="item">
+                <label for="num">库存：</label>
+                <input id="num" v-model="model.num">
+            </div>
+
+            <div class="item">
+                <label for="price">价格：</label>
+                <input id="price" v-model="model.price">
+            </div>
+
+        </template>
+    </form-comm>
+
+    <button @click="newForm">点我一下，我要新增数据</button>
+</div>
 <script>
+    let vue = new Vue({
+        el: "#app",
+        data: {
+            boxTitle : "新增商品",
+            url: 'http://localhost:8088/product',
+            model: {
+                productId: null,
+                productName: null,
+                num: 0,
+                price: 0.00
+            }
+        },
+        created() {
+            this.getProductById();
+        },
+        methods: {
 
+            onValidate(model){
+                if(model.productName == null){
+                    alert("请输入商品名称！");
+                    return false;
+                }else{
+                    return true;
+                }
+            },
+
+            newForm(){
+                this.model = {};
+                this.boxTitle = "新增商品";
+                this.$refs.myForm.showForm();
+            },
+
+            /**
+             * 模拟数据
+             */
+            getProductById() {
+                this.model = {
+                    productId: 5,
+                    productName: "火龙果",
+                    num: 5,
+                    price: 12.8
+                }
+                this.boxTitle  =`编辑商品(${this.model.productName})`;
+            }
+        }
+    });
 </script>
 </body>
 </html>
